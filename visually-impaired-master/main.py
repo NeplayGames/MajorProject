@@ -11,7 +11,7 @@ import torch
 import torch.utils.data as datas
 from PIL import Image
 import os
-from googletrans import Translator
+# from googletrans import Translator
 # import our OCR function
 from ocr_core import ocr_core
 
@@ -91,12 +91,12 @@ def scan_enviroment():
 
         caption = get_prediction(image=final_image, encoder=encoder, decoder=decoder)
         print(caption)
-        p = Translator()
-        caption = p.translate(caption, dest='nepali')
-        print(caption.pronunciation)
+        # p = Translator()
+        # caption = p.translate(caption, dest='nepali')
+        # print(caption.pronunciation)
 
         resp = Response(
-            caption.pronunciation)
+            caption)
         resp.headers['Access-Control-Allow-Origin'] = '*'
         return resp
     else:
