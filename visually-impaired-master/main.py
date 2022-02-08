@@ -1,6 +1,6 @@
 import io
 
-from flask import Flask, request, render_template, Response
+from flask import Flask, request, Response
 import base64
 from io import BytesIO
 import pickle
@@ -11,10 +11,6 @@ import enchant
 from CheckForSquareImage import Main
 
 app = Flask(__name__)
-
-# define a folder to store and later serve the images
-UPLOAD_FOLDER = 'static/uploads/'
-
 img_src = None
 
 # allow files of a specific type
@@ -49,7 +45,9 @@ def read_image():
         for a in arr:
             if not d.check(a):
                 arr.remove(a)
-
+        for a in arr:
+            if not a.isalpha() and not a.isspace() and not a.isalnum():
+                arr.remove(a)
         # data
 
         extracted_text = listToString(arr)

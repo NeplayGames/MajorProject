@@ -3,8 +3,8 @@ import numpy as np
 from ocr_core import mark_region
 
 ###################################
-widthImg = 540
-heightImg = 640
+widthImg = 800
+heightImg = 800
 
 
 #####################################
