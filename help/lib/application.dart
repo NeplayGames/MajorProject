@@ -9,13 +9,13 @@ import 'package:text_to_speech/text_to_speech.dart';
 
 class Command {
   static final all = [email, browser1, browser2, readText, see, callNumber];
-
   static const email = 'write email';
   static const browser1 = 'open';
   static const browser2 = 'go to';
   static const readText = 'read';
   static const see = 'see';
   static const callNumber = "call to";
+  static const command = "help";
 }
 
 class Application {
@@ -24,33 +24,43 @@ class Application {
     print(text);
     if (text.contains(Command.email)) {
       final body = _getTextAfterCommand(text: text, command: Command.email);
-
       openEmail(body: body);
+      return;
     }
     if (text.contains(Command.browser1)) {
       final url = _getTextAfterCommand(text: text, command: Command.browser1);
-
       openLink(url: url);
+      return;
+    }
+    if (text.contains(Command.command)) {
+      ProvideCommandInfo();
       return;
     }
     if (text.contains(Command.browser2)) {
       final url = _getTextAfterCommand(text: text, command: Command.browser2);
-
       openLink(url: url);
       return;
     }
     if (text.contains(Command.see)) {
-      See("see");
+      APICall("see");
       return;
     }
     if (text.contains(Command.readText)) {
-      See("read");
+      APICall("read");
       return;
     }
     if (text.contains(Command.callNumber)) {
       _launchCall((9840092372).toString());
       return;
     }
+    Speak("There is no such command");
+  }
+
+  static void ProvideCommandInfo() {
+    Speak("The command are as below. Help command provide command info."
+        "Open and go to command is used to open browser. write email"
+        "is used to write an email. read is used to read textual information form paper. see is use to see around the environment "
+        "Call number is use to access police hotline number");
   }
 
   static void initialCommand(String rawText) {}
@@ -107,31 +117,36 @@ class Application {
     }
   }
 
-  static Future See(String command) async {
+  static Future APICall(String command) async {
     final cameras = await availableCameras();
     final camera = cameras.first;
 
-    String result = await _showCamera(camera);
+    String result = await _showCamera(camera, command == 'read');
     http.Response output = await http
-        .post(Uri.parse("http://192.168.1.67:5000/${command}"), body: result);
+        .post(Uri.parse("http://192.168.1.69:5000/${command}"), body: result);
     if (output.statusCode == 200) {
-      TextToSpeech tts = TextToSpeech();
-      await tts.setLanguage("ne-NP");
       String res = await output.body.toString();
-      tts.speak(res);
+      Speak(res);
     }
+  }
+
+  static TextToSpeech tts = TextToSpeech();
+
+  static Future Speak(String res) async {
+    tts.speak(res);
   }
 
   ///This function will call the camera component and click the photo which is converted to base64 and then sent return the string
   ///after converting it into json after creating map of info
   ///It returns string
 
-  static Future<String> _showCamera(var camera) async {
+  static Future<String> _showCamera(var camera, bool flash) async {
     try {
       Uint8List _imgBytes;
       CameraController _cameraController;
       Future<void> _initializeCameraControllerFuture;
       _cameraController = CameraController(camera, ResolutionPreset.high);
+      _cameraController.setFlashMode(flash ? FlashMode.always : FlashMode.auto);
       _initializeCameraControllerFuture = _cameraController.initialize();
       await _initializeCameraControllerFuture;
       final picture = await _cameraController.takePicture();

@@ -1,8 +1,9 @@
 import nltk
 import pickle
 import os.path
-#from pycocotools.coco import COCO
 from collections import Counter
+
+from pycocotools.coco import COCO
 
 
 class Vocabulary(object):

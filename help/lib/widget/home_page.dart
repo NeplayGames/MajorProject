@@ -11,8 +11,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String text =
-      'Click on any part of screen and give command as /open youtube.com';
+  String text = 'Click on any part of screen and give command';
   bool isListening = false;
 
   @override
@@ -52,21 +51,24 @@ class _HomePageState extends State<HomePage> {
         ),
       );
 
-  Future toggleRecording() => SpeechApi.toggleRecording(
-        onListening: (isListening) {
-          setState(() => {
-            print(StackTrace.current),
-                this.isListening = isListening,
-                print(isListening),
-              });
-          if (!isListening) {
-            Future.delayed(Duration(seconds: 1), () {
-              Application.scanText(text);
+  Future toggleRecording() {
+    Application.tts.stop();
+    SpeechApi.toggleRecording(
+      onListening: (isListening) {
+        setState(() => {
+              print(StackTrace.current),
+              this.isListening = isListening,
+              print(isListening),
             });
-          }
-        },
-        onResult: (text) => setState(() => {
-              this.text = text,
-            }),
-      );
+        if (!isListening) {
+          Future.delayed(Duration(seconds: 1), () {
+            Application.scanText(text);
+          });
+        }
+      },
+      onResult: (text) => setState(() => {
+            this.text = text,
+          }),
+    );
+  }
 }

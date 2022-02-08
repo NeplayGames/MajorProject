@@ -116,7 +116,7 @@ for epoch in range(1, num_epochs+1):
     if epoch % save_every == 0:
         torch.save(decoder, os.path.join('models', f'decoder-{epoch}.pt'))
         torch.save(encoder, os.path.join('models', f'encoder-{epoch}.pt'))
-    #         learning_rate_scheduler.step()
+    #learning_rate_scheduler.step()
 
 # Close the training log file.
 f.close()

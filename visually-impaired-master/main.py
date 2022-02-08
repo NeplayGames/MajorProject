@@ -3,17 +3,12 @@ import io
 from flask import Flask, request, render_template, Response
 import base64
 from io import BytesIO
-import os
 import pickle
-import json
 from torchvision import transforms
 import torch
-import torch.utils.data as datas
 from PIL import Image
-import os
-# from googletrans import Translator
-# import our OCR function
-from ocr_core import ocr_core
+import enchant
+from CheckForSquareImage import Main
 
 app = Flask(__name__)
 
@@ -43,22 +38,33 @@ def allowed_file(filename):
 @app.route('/read', methods=['GET', 'POST'])
 def read_image():
     if request.method == 'POST':
-        datas = request.get_json(force=True)
-        im = Image.open(BytesIO(base64.b64decode(datas['img'])))
+        data = request.get_json(force=True)
+        im = Image.open(BytesIO(base64.b64decode(data['img'])))
         print("decode image", im)
-        print(im)
-        extracted_text = ocr_core(im)
-        resp = Response(
+        im.save('accept.jpg', 'PNG')
+        extracted_text = Main()
+        arr = extracted_text.split()
+        d = enchant.Dict("en_US")
+
+        for a in arr:
+            if not d.check(a):
+                arr.remove(a)
+
+        # data
+
+        extracted_text = listToString(arr)
+        response = Response(
             extracted_text)
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        return resp
+        print(extracted_text)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
 
     else:
         return "Post has not yet been called <h1>GET</h1>"
 
 
 @app.route("/see", methods=['GET', 'POST'])
-def scan_enviroment():
+def scan_env():
     if request.method == "POST":
         datas = request.get_json(force=True)
         im = Image.open(BytesIO(base64.b64decode(datas['img'])))
@@ -66,7 +72,6 @@ def scan_enviroment():
         im.save('accept.jpg', 'PNG')
 
         device = torch.device("cpu")
-        print("reached here")
         transform_test = transforms.Compose([
             transforms.Resize(256),  # smaller edge of image resized to 256
             transforms.RandomCrop(224),  # get 224x224 crop from random location
@@ -103,8 +108,15 @@ def scan_enviroment():
         return "Post has not yet been called <h1>GET</h1>"
 
 
+def listToString(s):
+    # initialize an empty string
+    str1 = " "
+
+    # return string
+    return str1.join(s)
+
+
 def clean_sentence(output):
-    idx2word = {}
     with open('vocab.pkl', 'rb') as f:
         vocab = pickle.load(f)
         idx2word = vocab.idx2word
