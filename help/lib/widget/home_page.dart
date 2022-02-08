@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> {
               text: text,
               terms: Command.all,
               textStyle: TextStyle(
-                fontSize: 32.0,
+                fontSize: 64.0,
                 color: Colors.black,
                 fontWeight: FontWeight.w400,
               ),

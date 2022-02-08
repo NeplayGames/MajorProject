@@ -21,7 +21,7 @@ class Command {
 class Application {
   static void scanText(String rawText) {
     final text = rawText.toLowerCase();
-    print(text);
+    if (text.isEmpty) return;
     if (text.contains(Command.email)) {
       final body = _getTextAfterCommand(text: text, command: Command.email);
       openEmail(body: body);
@@ -117,11 +117,15 @@ class Application {
     }
   }
 
+  static var cameras;
+  static var camera;
   static Future APICall(String command) async {
-    final cameras = await availableCameras();
-    final camera = cameras.first;
+    if (camera == null) {
+      cameras = await availableCameras();
+      camera = cameras.first;
+    }
 
-    String result = await _showCamera(camera, command == 'read');
+    String result = await _showCamera(camera, command == Command.readText);
     http.Response output = await http
         .post(Uri.parse("http://192.168.1.69:5000/${command}"), body: result);
     if (output.statusCode == 200) {
