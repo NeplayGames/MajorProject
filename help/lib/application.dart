@@ -8,13 +8,12 @@ import 'package:http/http.dart' as http;
 import 'package:text_to_speech/text_to_speech.dart';
 
 class Command {
-  static final all = [email, browser1, browser2, readText, see, callNumber];
-  static const email = 'write email';
+  static final all = [browser1, browser2, readText, see, callNumber];
   static const browser1 = 'open';
   static const browser2 = 'go to';
   static const readText = 'read';
   static const see = 'see';
-  static const callNumber = "call to";
+  static const callNumber = "call";
   static const command = "help";
 }
 
@@ -22,11 +21,11 @@ class Application {
   static void scanText(String rawText) {
     final text = rawText.toLowerCase();
     if (text.isEmpty) return;
-    if (text.contains(Command.email)) {
-      final body = _getTextAfterCommand(text: text, command: Command.email);
-      openEmail(body: body);
-      return;
-    }
+    // if (text.contains(Command.email)) {
+    //   final body = _getTextAfterCommand(text: text, command: Command.email);
+    //   openEmail(body: body);
+    //   return;
+    // }
     if (text.contains(Command.browser1)) {
       final url = _getTextAfterCommand(text: text, command: Command.browser1);
       openLink(url: url);
@@ -50,7 +49,10 @@ class Application {
       return;
     }
     if (text.contains(Command.callNumber)) {
-      _launchCall((9840092372).toString());
+      String aStr = text.replaceAll(new RegExp(r'[^0-9]'), '');
+
+      final number = int.parse(aStr);
+      _launchCall(number.toString());
       return;
     }
     Speak("There is no such command");
@@ -58,9 +60,9 @@ class Application {
 
   static void ProvideCommandInfo() {
     Speak("The command are as below. Help command provide command info."
-        "Open and go to command is used to open browser. write email"
-        "is used to write an email. read is used to read textual information form paper. see is use to see around the environment "
-        "Call number is use to access police hotline number");
+        "Open and go to command is used to open browser. "
+        " read is used to read textual information form paper. see is use to see around the environment "
+        "Call and a phone number is use to access police hotline number");
   }
 
   static void initialCommand(String rawText) {}
@@ -82,26 +84,25 @@ class Application {
   static Future openLink({
     @required String url,
   }) async {
-    if (url.trim().isEmpty) {
-      // final response = await http.head(Uri.parse('https://$url.com'));
-      // print(url);
-      // if (response.statusCode == 200) {
-      //   if (await canLaunch("$url.com")) {
-      //     await launch("$url.com");
-      //   }
-      // } else {}
-      await _launchUrl('https://google.com');
+    if (url.toLowerCase().indexOf((".com").toLowerCase()) != -1) {
+      await _launchUrl("https://$url");
     } else {
-      await _launchUrl('https://$url');
+      http.Response response = await http.get(Uri.parse("https://$url.com"));
+      print(url);
+      if (response.statusCode == 200) {
+        await _launchUrl("https://$url.com");
+      } else {
+        await _launchUrl("https://google.com");
+      }
     }
   }
 
-  static Future openEmail({
-    @required String body,
-  }) async {
-    final url = 'mailto: ?body=${Uri.encodeFull(body)}';
-    await _launchUrl(url);
-  }
+  // static Future openEmail({
+  //   @required String body,
+  // }) async {
+  //   final url = 'mailto: ?body=${Uri.encodeFull(body)}';
+  //   await _launchUrl(url);
+  // }
 
   static Future _launchCall(String number) async {
     print(await canLaunch(number));
@@ -127,10 +128,13 @@ class Application {
 
     String result = await _showCamera(camera, command == Command.readText);
     http.Response output = await http
-        .post(Uri.parse("http://192.168.1.69:5000/${command}"), body: result);
+        .post(Uri.parse("http://192.168.126.39:5000/${command}"), body: result);
+    //.post(Uri.parse("http://192.168.1.69:5000/${command}"), body: result);
     if (output.statusCode == 200) {
       String res = await output.body.toString();
       Speak(res);
+    } else {
+      Speak("Could not get response from the server");
     }
   }
 
@@ -150,7 +154,7 @@ class Application {
       CameraController _cameraController;
       Future<void> _initializeCameraControllerFuture;
       _cameraController = CameraController(camera, ResolutionPreset.high);
-      _cameraController.setFlashMode(flash ? FlashMode.always : FlashMode.auto);
+      _cameraController.setFlashMode(FlashMode.auto);
       _initializeCameraControllerFuture = _cameraController.initialize();
       await _initializeCameraControllerFuture;
       final picture = await _cameraController.takePicture();

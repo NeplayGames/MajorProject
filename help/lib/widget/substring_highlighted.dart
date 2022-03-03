@@ -15,6 +15,7 @@ class SubstringHighlight extends StatelessWidget {
     ),
     this.textStyleHighlight = const TextStyle(
       color: Colors.red,
+      fontSize: 72,
     ),
   });
 

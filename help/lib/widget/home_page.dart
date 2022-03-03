@@ -13,7 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String text = 'Click on any part of screen and give command';
   bool isListening = false;
-
+  bool Launched = false;
   @override
   Widget build(BuildContext context) => GestureDetector(
         onTap: toggleRecording,
@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
                 fontWeight: FontWeight.w400,
               ),
               textStyleHighlight: TextStyle(
-                fontSize: 32.0,
+                fontSize: 64.0,
                 color: Colors.red,
                 fontWeight: FontWeight.w400,
               ),
@@ -46,13 +46,14 @@ class _HomePageState extends State<HomePage> {
             animate: isListening,
             endRadius: 75,
             glowColor: Theme.of(context).primaryColor,
-            child: Icon(isListening ? Icons.mic : Icons.mic_none, size: 36),
+            child: Icon(isListening ? Icons.mic : Icons.mic_none, size: 72),
           ),
         ),
       );
 
   Future toggleRecording() {
     Application.tts.stop();
+    Launched = false;
     SpeechApi.toggleRecording(
       onListening: (isListening) {
         setState(() => {
@@ -62,6 +63,8 @@ class _HomePageState extends State<HomePage> {
             });
         if (!isListening) {
           Future.delayed(Duration(seconds: 1), () {
+            if (Launched) return;
+            Launched = true;
             Application.scanText(text);
           });
         }

@@ -46,7 +46,7 @@ def read_image():
             if not d.check(a):
                 arr.remove(a)
         for a in arr:
-            if not a.isalpha() and not a.isspace() and not a.isalnum():
+            if not a.isalpha() and not a.isspace() and not a.isalnum() and len(a) < 3:
                 arr.remove(a)
         # data
 
@@ -66,7 +66,7 @@ def scan_env():
     if request.method == "POST":
         datas = request.get_json(force=True)
         im = Image.open(BytesIO(base64.b64decode(datas['img'])))
-        print("decode image", im)
+        #print("decode image", im)
         im.save('accept.jpg', 'PNG')
 
         device = torch.device("cpu")
@@ -91,7 +91,7 @@ def scan_env():
         final_image = final_image.unsqueeze(0)
         print(final_image.shape)
         final_image = final_image.to(device)
-
+        PIL_image.save('accept.jpg', 'PNG')
         caption = get_prediction(image=final_image, encoder=encoder, decoder=decoder)
         print(caption)
         # p = Translator()
@@ -138,4 +138,4 @@ def get_prediction(image, encoder, decoder):
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+        app.run(host='0.0.0.0', port=5000)
